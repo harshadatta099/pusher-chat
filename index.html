@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pusher Test</title>
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+    <script>
+        // Enable pusher logging - don't include this in production
+        Pusher.logToConsole = true;
+
+        var pusher = new Pusher('04110b925bdfe2cdce22', {
+            cluster: 'ap2'
+        });
+
+        var channel = pusher.subscribe('my-channel');
+        channel.bind('my-event', function (data) {
+            // Append the new message to the message container
+            var messageContainer = document.getElementById('message-container');
+            var messageElement = document.createElement('div');
+            messageElement.textContent = data.message;
+            messageContainer.appendChild(messageElement);
+        });
+
+        function sendMessage() {
+            var messageInput = document.getElementById('message-input');
+            var message = messageInput.value;
+            // Send the message to the server
+            fetch('http://localhost:3000/send-message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: message })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to send message');
+                }
+                messageInput.value = ''; // Clear the input field
+            })
+            .catch(error => console.error('Error sending message:', error));
+        }
+    </script>
+</head>
+
+<body>
+    <h1>Pusher Test</h1>
+    <div id="message-container"></div>
+    <input type="text" id="message-input" placeholder="Enter your message">
+    <button onclick="sendMessage()">Send</button>
+</body>
+
+</html>

@@ -1,0 +1,12 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug JavaScript File",
+            "program": "app.js",
+            "skipFiles": ["<node_internals>/**"]
+        }
+    ]
+}
