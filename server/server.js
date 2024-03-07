@@ -1,6 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const cors = require("cors"); // Import cors middleware
+const cors = require("cors");
 const Pusher = require("pusher");
 
 const app = express();
@@ -24,9 +24,19 @@ const pusher = new Pusher({
 app.use(express.static("public"));
 
 app.post("/send-message", (req, res) => {
-	const message = req.body.message;
-	pusher.trigger("my-channel", "my-event", { message });
+	// const message = req.body.message;
+	const { message, channelName } = req.body;
+	pusher.trigger(channelName, "my-event", { message });
 	res.sendStatus(200);
+});
+
+app.post("/pusher/auth", (req, res) => {
+	const socketId = req.body.socket_id;
+	const channel = req.body.channel_name;
+
+	const auth = pusher.authenticate(socketId, channel);
+
+	res.send(auth);
 });
 
 app.listen(port, () => {
