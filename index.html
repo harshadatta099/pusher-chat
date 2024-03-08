@@ -6,18 +6,78 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pusher Test</title>
     <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+    <style>
+        /* Modal styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0, 0, 0); /* Fallback color */
+            background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+            padding-top: 60px;
+        }
+
+        /* Modal content */
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto; /* 15% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
+        }
+
+        /* Close button */
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
     <script>
         Pusher.logToConsole = true;
 
-        var pusher = new Pusher('04110b925bdfe2cdce22', {
-            cluster: 'ap2',
-            authEndpoint: 'http://localhost:3000/pusher/auth'
-        });
+        var pusher = null;
+        var channelName = '';
+
+        function openModal() {
+            var modal = document.getElementById("myModal");
+            modal.style.display = "block";
+        }
+
+        function closeModal() {
+            var modal = document.getElementById("myModal");
+            modal.style.display = "none";
+            channelName = document.getElementById('channel-input').value;
+            if (channelName.trim() !== '') {
+                connectToPusher();
+            }
+        }
+
+        function connectToPusher() {
+            pusher = new Pusher('04110b925bdfe2cdce22', {
+                cluster: 'ap2',
+                authEndpoint: 'http://localhost:3000/pusher/auth'
+            });
+
+            subscribeToChannel(channelName);
+        }
 
         function sendMessage() {
             var messageInput = document.getElementById('message-input');
             var message = messageInput.value;
-            var channelName = 'private-channel';
 
             fetch('http://localhost:3000/send-message', {
                 method: 'POST',
@@ -36,7 +96,6 @@
         }
 
         function subscribeToChannel(channelName) {
-            debugger;
             var channel = pusher.subscribe(channelName);
             channel.bind('my-event', function (data) {
                 console.log("data", data);
@@ -46,16 +105,26 @@
                 messageContainer.appendChild(messageElement);
             });
         }
-
-        window.onload = function () {
-            var channelName = 'private-channel';
-            subscribeToChannel(channelName);
-        };
     </script>
 </head>
 
 <body>
+    <!-- The Modal -->
+    <div id="myModal" class="modal">
+
+        <!-- Modal content -->
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <label for="channel-input">Channel Name:</label>
+            <input type="text" id="channel-input" placeholder="Enter channel name">
+            <button onclick="closeModal()">Connect</button>
+        </div>
+
+    </div>
+
     <h1>Pusher Test</h1>
+    <button onclick="openModal()">Connect to Channel</button>
+
     <div id="message-container"></div>
     <input type="text" id="message-input" placeholder="Enter your message">
     <button onclick="sendMessage()">Send</button>
